@@ -55,11 +55,14 @@ public class ShipRestController {
                 .orElseThrow(() -> new ShipNotFoundException(shipId));
     }
 
+
     @PostMapping(value = "/{id:\\d+}/damage")
     @ResponseStatus(HttpStatus.OK)
     public ShipDamagedEvent postDamagedShip(@PathVariable("id") Long shipId) {
+
         ShipDamagedEvent shipDamagedEvent = new ShipDamagedEvent(shipId);
         shipComponentLogic.sendMessage("ship-damaged", shipDamagedEvent);
+
         return shipDamagedEvent;
     }
 
@@ -70,14 +73,24 @@ public class ShipRestController {
     }
 
     @PutMapping
-    public void updateShip(@Valid @RequestBody ShipUpdateDTO shipUpdateDTO) throws ShipNotFoundException {
+    public Ship updateShip(@Valid @RequestBody ShipUpdateDTO shipUpdateDTO) throws ShipNotFoundException {
 
         Ship shipToUpdate = shipRepository
                 .findById(shipUpdateDTO.getId())
                 .orElseThrow(() -> new ShipNotFoundException(shipUpdateDTO.getId()));
 
         if (shipUpdateDTO.getDamaged() != null) {
-            shipToUpdate.setDamaged(shipUpdateDTO.getDamaged());
+
+            if (!(shipToUpdate.isDamaged() == shipUpdateDTO.getDamaged())) {
+                if (!shipToUpdate.isDamaged() && shipUpdateDTO.getDamaged()) {
+                    shipToUpdate.setDamaged(shipUpdateDTO.getDamaged());
+                    ShipDamagedEvent shipDamagedEvent = new ShipDamagedEvent(shipUpdateDTO.getId());
+                    shipComponentLogic.sendMessage("ship-damaged", shipDamagedEvent);
+                } else {
+                    shipToUpdate.setDamaged(shipUpdateDTO.getDamaged());
+                }
+            }
+
         }
 
         if (shipUpdateDTO.getAvailableContainers() != null) {
@@ -85,6 +98,7 @@ public class ShipRestController {
         }
 
         shipRepository.save(shipToUpdate);
+        return shipToUpdate;
     }
 
     @RetryableTopic(include = {ShipDamagedException.class, ShipNotFoundException.class}, attempts = "3", backoff = @Backoff(delay = 5_000, maxDelay = 30_000, multiplier = 2))
