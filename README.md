@@ -251,28 +251,104 @@ After starting the application, you can then start to test or observe some of th
 #### Getting a list of Customers
 Using Postman API, you can copy and paste the following HTTP request URL and select the **GET** method (the action type) on the left of the URL field to get a list of Customers:
 ```
-http://localhost:8080/customers/
-```
-
-After clicking "Send" button, you will see the following response:
-```
-  
+http://localhost:8080/customers
 ```
 
 #### Getting a list of available Ships
+Copy and paste the following HTTP request URL and select the **GET** method to get a list of available Ships:
+```
+ http://localhost:8080/ships
+```
 
 #### Create a new Customer
+A new customer can be created by adding the following details as JSON in the body data (**Further reading: https://learning.postman.com/docs/sending-requests/requests/#sending-body-data**):
+```
+{
+    "firstName": "First Name",
+    "lastName": "Last Name"
+}
+```
+Afterwards, copy and paste the following URL and select the **POST** method to successfully create a Customer:
+```
+http://localhost:8080/customers
+```
 
 #### Delete a Customer
+A Customer can be deleted from the system by specifying the specific Customer ID in the HTTP URL and selecting the **DELETE** method. As an example, the Customer with the ID 5 want to be removed from the system:
+```
+http://localhost:8080/customers/5
+```
 
 #### Create a new Ship
+A new Ship can be created by adding the following details as JSON in the body data:
+```
+{
+    "shipName": "Ship One",
+    "availableContainers": 20,
+    "damaged": false
+}
+```
+It is important to note that **integer** number should be provided to define how many available containers a ship has (just like the example above). As for the status of the ship, **boolean** value is required (TRUE = damaged, FALSE = good condition).
 
+Afterwards, copy and paste the following URL and select the POST method to successfully create a Ship:
+```
+ http://localhost:8080/ships
+```
 #### Create a new booking (Customer books a ship with required containers)
+Customers can book ships. In order to create a booking successfully, the ID of the specific customer needs to be defined in the URL. Using the **POST** method, below is the example of the URL:
+```
+ http://localhost:8080/customers/5/bookings
+```
+The request example above means that the Customer with the ID 5 wants to book a new ship. Furthermore, the details of the booked ship still need to be defined as JSON in the body data so that the booking can be created successfully:
+```
+{
+    "shipId": 4,
+    "containerCount": 2,
+}
+```
+The specified data above means that the Customer with the ID 5 wants to book the Ship with the ID 4 and the required container of this ship is 2. If the status of the booked Ship at the time is **FALSE** (meaning the ship is in good condition), you can see that the booking status of the customer is changed from _**REQUESTED**_ to _**CONFIRMED**_. You can check the booking status of the ship by seeing the list of the Customers (see **Getting a list of Customers**).
 
 #### Getting a list of Bookings
+You can see the list of all bookings from all customers by selecting the **GET** method and copying and pasting the following URL:
+```
+http://localhost:8080/bookings
+```
 
 #### Getting Booking(s) of a specific Customer
+You can retrieve a list of bookings of a specific customer by firstly defining the ID of the Customer you want to see (in the example below, Customer with the ID 5), selecting the **GET** method, and finally copying and pasting the following URL:
+```
+http://localhost:8080/customers/5/bookings
+```
 
-#### Change the status of the ship
+#### Change the status/condition of the ship
+The status/condition of a Ship can be changed/updated whenever it's damaged or not. To achieve this, copy and paste the following URL and choose **PUT** method:
+```
+http://localhost:8080/ships
+```
+Afterwards, you still need to specify the ID and the status of the ship as JSON in the body data. In the example below, we want to tell that the Ship with the ID 4 is currently damaged:
+```
+{
+    "id": 4,
+    "damaged": true
+}
+```
+Finally, you can check the status of the ship by seeing the list of the Ships (see **Getting the list of available Ships**).
 
 #### Implementing retry
+The retry functionality can be observed by implementing the following scenario:
+
+The status of a ship can be set from "ready-to-go" to "damaged". If a ship is at that time damaged, then the ship and its containers cannot be reserved. However, if the ship is repaired, its status can be changed back to "ready-to-go" at any time and hence the ship and its containers can be booked again. But since we could not know exactly when the status of the ship will be changed to "ready-to-go", retry is implemented here.
+
+For example, you want to reserve a few containers from a "damaged" ship and thus you send a request if it's still available. As soon as you sent the request, the ship is actually at the moment damaged. However, the status of the ship is set to "ready-to-go" in the next second because it had been repaired. Therefore, you need to check if, for example, within a few seconds the status is changed.
+
+Follow the following steps to observe the retry being implemented:
+- See a list of available Ships (see **Getting the list of available Ships**)
+- Select a ship whose status you wish to modify
+- Change the status of the chosen Ship to **TRUE** (damaged = **TRUE**, ship is damaged)
+- See a list of available Ships again to make sure the status of the chosen Ship has changed
+- See a list of Customers (see **Getting a list of Customers**)
+- Select one of the Customers that wants to book a ship
+- With the chosen Customer, book a currently damaged ship and its containers (see **Create a new booking**)
+- Since the booked ship is currently damaged, the system will retry to book it a few times (precisely 3 times). At the console, you can see the LOG info stating that the booking confirmation is being retried
+- **If the Ship is still damaged**, the system will throw the exception stating that the booked ship is still damaged. The booking is then cancelled
+- **If the Ship is being repaired and its status changes** between the retry period, the ship is successfully booked and hence the booking can be confirmed
