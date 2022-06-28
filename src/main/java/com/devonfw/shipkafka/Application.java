@@ -49,11 +49,13 @@ class PopulateTestDataRunner implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 
-		shipRepository.save(new Ship("Ship Aachen", 2));
-		Ship shipBerlin = new Ship("Ship Berlin", 5);
+		shipRepository.save(new Ship("Ship Aachen", 2, false));
+		Ship shipBerlin = new Ship("Ship Berlin", 5, false);
 		shipRepository.save(shipBerlin);
-		Ship shipHamburg = new Ship("Ship Hamburg", 8);
+		Ship shipHamburg = new Ship("Ship Hamburg", 8, true);
 		shipRepository.save(shipHamburg);
+		Ship shipFrankfurt = new Ship("Ship Frankfurt", 20, false);
+		shipRepository.save(shipFrankfurt);
 
 		Arrays.asList(
 						"Miller,Doe,Smith".split(","))
