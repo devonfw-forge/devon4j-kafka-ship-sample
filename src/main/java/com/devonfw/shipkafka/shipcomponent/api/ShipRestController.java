@@ -80,17 +80,13 @@ public class ShipRestController {
                 .orElseThrow(() -> new ShipNotFoundException(shipUpdateDTO.getId()));
 
         if (shipUpdateDTO.getDamaged() != null) {
-
-            if (!(shipToUpdate.isDamaged() == shipUpdateDTO.getDamaged())) {
-                if (!shipToUpdate.isDamaged() && shipUpdateDTO.getDamaged()) {
-                    shipToUpdate.setDamaged(shipUpdateDTO.getDamaged());
-                    ShipDamagedEvent shipDamagedEvent = new ShipDamagedEvent(shipUpdateDTO.getId());
-                    shipComponentLogic.sendMessage("ship-damaged", shipDamagedEvent);
-                } else {
-                    shipToUpdate.setDamaged(shipUpdateDTO.getDamaged());
-                }
+            if (!shipToUpdate.isDamaged() && shipUpdateDTO.getDamaged()) {
+                shipToUpdate.setDamaged(shipUpdateDTO.getDamaged());
+                ShipDamagedEvent shipDamagedEvent = new ShipDamagedEvent(shipUpdateDTO.getId());
+                shipComponentLogic.sendMessage("ship-damaged", shipDamagedEvent);
+            } else {
+                shipToUpdate.setDamaged(shipUpdateDTO.getDamaged());
             }
-
         }
 
         if (shipUpdateDTO.getAvailableContainers() != null) {
