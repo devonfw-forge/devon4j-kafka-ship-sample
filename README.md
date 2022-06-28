@@ -215,3 +215,64 @@ public void listenBookingsDlt(Booking booking){
 ```
 
 In this example the `@RetryableTopic` annotation attempts to process a received message 3 times. The first retry is done after a delay of 2 seconds. Each further attempt multiplies the delay by 2 with a max delay of 10 seconds. If the message couldn't be processed, it gets send to the deadletter topic annotated with `@DltHandler`.
+
+```
+bookings-retry-5000
+```
+Each retry creates a new topic like in the example above.
+
+DLT creates a topic for messages that could not get processed. The topic gets named like the example below:
+```
+bookings-dlt
+```
+
+### Execution
+#### Prerequisite
+In order to run the sample application, it is required to have ZooKeeper & Kafka running on your system.
+```
+docker-compose up
+```
+
+As for testing environment, we suggest you to use **Postman API** for simple API test (Further reading: https://learning.postman.com/docs/getting-started/introduction/). The tests of this app's functionalities are thoroughly elaborated below (after **Starting the Application**).
+
+#### Starting the Application
+We use Gradle as a build tool and the Spring Boot Gradle plugin to run our application. If you are using IntelliJ, you can run the application from the context menu:
+- Open the Gradle tool window which can be found on the right side of IntelliJ window
+- Click the application task (Tasks > application)
+- Double click bootRun to start the application
+
+if you want to start the application from the terminal, run the following command in a terminal window (open terminal in root directory):
+```
+./gradlew bootRun
+```
+
+After starting the application, you can then start to test or observe some of the app's functionalities, which are going to be elaborated thorougly below.
+
+#### Getting a list of Customers
+Using Postman API, you can copy and paste the following HTTP request URL and select the **GET** method (the action type) on the left of the URL field to get a list of Customers:
+```
+http://localhost:8080/customers/
+```
+
+After clicking "Send" button, you will see the following response:
+```
+  
+```
+
+#### Getting a list of available Ships
+
+#### Create a new Customer
+
+#### Delete a Customer
+
+#### Create a new Ship
+
+#### Create a new booking (Customer books a ship with required containers)
+
+#### Getting a list of Bookings
+
+#### Getting Booking(s) of a specific Customer
+
+#### Change the status of the ship
+
+#### Implementing retry
