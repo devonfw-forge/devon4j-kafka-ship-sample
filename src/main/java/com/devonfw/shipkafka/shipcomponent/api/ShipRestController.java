@@ -55,17 +55,6 @@ public class ShipRestController {
                 .orElseThrow(() -> new ShipNotFoundException(shipId));
     }
 
-
-    @PostMapping(value = "/{id:\\d+}/damage")
-    @ResponseStatus(HttpStatus.OK)
-    public ShipDamagedEvent postDamagedShip(@PathVariable("id") Long shipId) {
-
-        ShipDamagedEvent shipDamagedEvent = new ShipDamagedEvent(shipId);
-        shipComponentLogic.sendMessage("ship-damaged", shipDamagedEvent);
-
-        return shipDamagedEvent;
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public IdDTO addShip(@Valid @RequestBody ShipCreateDTO shipCreateDTO) {
