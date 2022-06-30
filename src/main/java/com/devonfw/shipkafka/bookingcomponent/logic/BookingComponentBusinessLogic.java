@@ -87,8 +87,10 @@ public class BookingComponentBusinessLogic {
         }
 
         for (Booking booking : bookings) {
-            booking.updateBookingStatus(BookingStatus.CANCELED);
-            bookingRepository.save(booking);
+            if(booking.getBookingStatus() != BookingStatus.CANCELED) {
+                booking.updateBookingStatus(BookingStatus.CANCELED);
+                bookingRepository.save(booking);
+            }
         }
     }
 
@@ -97,9 +99,9 @@ public class BookingComponentBusinessLogic {
                 .findById(booking.getId())
                 .orElseThrow(() -> new BookingNotFoundException(booking.getId()));
 
-        //if(b.getBookingStatus() != BookingStatus.CANCELED){
+        if(b.getBookingStatus() != BookingStatus.CANCELED){
             b.updateBookingStatus(booking.getBookingStatus());
             bookingRepository.save(b);
-        //}
+        }
     }
 }
